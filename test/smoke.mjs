@@ -11,6 +11,16 @@ function assert(condition, msg) {
 
 function mockCtx(calendarEvents = [], settings = {}) {
   let callCount = 0;
+  const httpStub = async (url) => {
+    callCount++;
+    if (url.includes('oauth2.googleapis.com/token')) {
+      return { ok: true, json: async () => ({ access_token: 'test-token' }), text: async () => '' };
+    }
+    if (url.includes('googleapis.com/calendar')) {
+      return { ok: true, json: async () => ({ items: calendarEvents }), text: async () => '' };
+    }
+    throw new Error(`Unexpected request: ${url}`);
+  };
   return {
     env: {
       GOOGLE_CALENDAR_CLIENT_ID:     'client-id-test',
@@ -18,16 +28,7 @@ function mockCtx(calendarEvents = [], settings = {}) {
       GOOGLE_CALENDAR_REFRESH_TOKEN: 'refresh-token-test',
     },
     settings,
-    async fetch(url) {
-      callCount++;
-      if (url.includes('oauth2.googleapis.com/token')) {
-        return { ok: true, json: async () => ({ access_token: 'test-token' }), text: async () => '' };
-      }
-      if (url.includes('googleapis.com/calendar')) {
-        return { ok: true, json: async () => ({ items: calendarEvents }), text: async () => '' };
-      }
-      throw new Error(`Unexpected fetch: ${url}`);
-    },
+    fetch: httpStub,
     getCallCount: () => callCount,
   };
 }
@@ -90,7 +91,7 @@ assert(allJobs.length === 3, 'allEvents:true returns all events');
 
 // 6. Token exchange is called
 console.log('\n6. OAuth flow');
-assert(ctx.getCallCount() >= 2, 'at least 2 fetch calls (token + calendar)');
+assert(ctx.getCallCount() >= 2, 'at least 2 http calls (token + calendar)');
 
 console.log(`\n${passed + failed} checks — ${passed} passed, ${failed} failed`);
 if (failed > 0) process.exit(1);

@@ -1,0 +1,17 @@
+{
+  "id": "google-calendar",
+  "name": "google-calendar",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "description": "Google Calendar ingest: detect upcoming interview events and surface them in the career-ops pipeline.",
+  "hooks": ["ingest"],
+  "requiredEnv": [
+    "GOOGLE_CALENDAR_CLIENT_ID",
+    "GOOGLE_CALENDAR_CLIENT_SECRET",
+    "GOOGLE_CALENDAR_REFRESH_TOKEN"
+  ],
+  "allowedHosts": ["oauth2.googleapis.com", "www.googleapis.com"],
+  "skill": "skill.md",
+  "humanInTheLoop": true,
+  "homepage": "https://github.com/Schlaflied/career-ops-plugin-google-calendar"
+}
